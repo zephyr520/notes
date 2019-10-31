@@ -79,7 +79,7 @@ public abstract class Launcher {
 	*/
 	protected void launch(String[] args) throws Exception {
 		JarFile.registerUrlProtocolHandler();
-		// 根据从classpath目录下获取的归档类集合，来创建一个来加载器
+		// 根据从classpath目录下获取的归档类集合，来创建一个自定义类加载器
 		ClassLoader classLoader = createClassLoader(getClassPathArchives());
 		// getMainClass():从manifest文件中获取属性为Start-Class对应的值
 		launch(args, getMainClass(), classLoader);
@@ -102,7 +102,7 @@ public abstract class Launcher {
 	 * 创建一个类加载器LaunchedURLClassLoader
 	 */
 	protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-		// 将当前启动器类的类加载作为父加载器（当前启动器类的加载器是应用类加载器）
+		// 将当前启动器类的类加载作为父加载器（当前启动器类的加载器是应用类加载器）来创建自定义类加载器
 		return new LaunchedURLClassLoader(urls, getClass().getClassLoader());
 	}
 
@@ -260,4 +260,4 @@ public class MainMethodRunner {
 
 }
 ```
-最后，在MainMethodRunner类中会调用run方法，该方法最终通过启动类名称(com.example.springboot.SpringbootApplication)来获取当前线程的上线文类加载器，来加载该启动器类，然后以反射的方式获取启动类中的main方法，最终执行该main方法进行启动。
+最后，在MainMethodRunner类中会调用run方法，先获取当前线程的上线文类加载器，然后使用该类加载器将“com.example.springboot.SpringbootApplication”启动类来进行加载，然后以反射的方式获取启动类中的main方法，最终执行该main方法进行启动。
