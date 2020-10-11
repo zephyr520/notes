@@ -10,7 +10,7 @@
 
 #### AOP的创建
 1. 生成代理对象的核心类，**ProxyFactoryBean.getObject()**
-```
+```java
 /**
  * Return a proxy. Invoked when clients obtain beans from this factory bean.
  * Create an instance of the AOP proxy to be returned by this factory.
@@ -34,7 +34,7 @@ public Object getObject() throws BeansException {
 }
 ```
 2. 生成代理时，是选择JDK Dynamic Proxy还是cglib Proxy的核心逻辑：**DefaultAopProxyFactory.createAopProxy(AdvisedSupport config)**
-```
+```java
 @Override
 public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 	if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
@@ -56,7 +56,7 @@ public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException 
 > createAopProxy方法生成代理对象的真正执行者，那么此操作是在何时被调用的呢？又是如何把最终被代理的对象交给IOC的呢？从Spring Bean的生命周期发现，Bean在被创建的时候，有一系列的回调接口供用户自定义实现，来更改Bean的一些特性，其中**BeanPostProcessor**接口就是其中一种，SpringAOP就是通过实现该接口，如果正在创建的Bean是AOP的target(被代理的目标对象)，则创建代理，并把最终的被代理的对象返回给Ioc容器进行管理。
 
 &emsp;从上面类图结构看到，**AbstractAutoProxyCreator**这个类是一个**BeanPostProcessor**接口的实现，用来创建代理对象，在**AbstractAutoProxyCreator.postProcessBeforeInstantiation**方法中，最终返回了createProxy()方法返回的代理。
-```
+```java
 @Override
 public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 	Object cacheKey = getCacheKey(beanClass, beanName);
@@ -130,7 +130,7 @@ protected Object createProxy(
 
 由于Spring AOP的代理方式的实现有两种：**JDK的动态代理(JDK Dynamic Proxy)** 和**CGLIB代理(CGLIB Proxy)**，在执行拦截器的方式有所不同，
 J**DK的动态代理实现了InvocationHandler接口中的invoke()方法**，源码如下：
-```
+```java
 /**
  * Implementation of {@code InvocationHandler.invoke}.
  * <p>Callers will see exactly the exception thrown by the target,
@@ -229,7 +229,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 ```
 对目标方法的调用最终是依靠ReflectiveMethodInvocation。
 ReflectiveMethodInvocation中的proceed处理是采用递归的方式处理拦截器链
-```
+```java
 @Override
 public Object proceed() throws Throwable {
 	//	We start with an index of -1 and increment early.
@@ -262,7 +262,7 @@ public Object proceed() throws Throwable {
 ```
 
 CGLIB代理的核心类：cglibAopProxy.getProxy()方法
-```
+```java
 @Override
 public Object getProxy(ClassLoader classLoader) {
 	
@@ -285,7 +285,7 @@ public Object getProxy(ClassLoader classLoader) {
 }
 ```
 最终通过实现MethodInterceptor接口的intercept方法，来实现对目标方法拦截
-```
+```java
 @Override
 public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 	Object oldProxy = null;

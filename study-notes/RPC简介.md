@@ -113,7 +113,7 @@ public class ConsumerApp {
 **通过一个CalculatorRemoteImpl，我们把RPC的逻辑封装进去了，客户端调用时感知不到远程调用的麻烦**。下面再来看看CalculatorRemoteImpl，代码有些多，但是其实就是把上面的2、3、4几个步骤用代码实现了而已，CalculatorRemoteImpl： 
 
 
-```
+```java
 public class CalculatorRemoteImpl implements Calculator {
     public int add(int a, int b) {
         List<String> addressList = lookupProviders("Calculator.add");

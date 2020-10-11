@@ -38,7 +38,7 @@ public class Cat implements Barking {
 文件“com.zephyr.demo.Barking”中的内容是：“com.zephyr.demo.Cat”
 
 - spi-test: 用来模拟用户测试
-```
+```java
 public class Test {
 	public static void main(String[] args) {
 		ServiceLoader<Barking> services = ServiceLoader.load(Barking.class);

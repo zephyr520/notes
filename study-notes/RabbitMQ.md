@@ -106,7 +106,7 @@
 - Producer&Consumer：生产者和消费者
 
 1. **生产者**
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -133,7 +133,7 @@ public class Producer {
 }
 ```
 2. **消费者**
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -188,7 +188,7 @@ public class Consumer {
 
 ##### 1、Direct Exchange
 > 所有发送到Direct Exchange的消息被转发到RoutingKey中指定的Queue  
-  
+
 <font color=red>注意：</font>Direct模式可以使用RabbitMQ自带的Exchange：default Exchange，所以不需要将Exchange进行任何绑定(binding)操作，消息传递时，RoutingKey必须完全匹配才会被队列接收，否则该消息会被抛弃
 ![](images/direct-exchange.jpg)
 
@@ -249,24 +249,29 @@ public class Consumer {
 
 **消息落库步骤**
 
-	1. 写入数据库，可能涉及多个库，业务库，消息库
-	2. 发送消息
-	3. 消息确认
-	4. 更新数据库消息状态
-	5. 定时任务获取数据库消息状态
-	6. 重试发送
-	7. 重试数量大于 3 次，修改状态
+```java
+1. 写入数据库，可能涉及多个库，业务库，消息库
+2. 发送消息
+3. 消息确认
+4. 更新数据库消息状态
+5. 定时任务获取数据库消息状态
+6. 重试发送
+7. 重试数量大于 3 次，修改状态
+```
 2. 消息的延迟投递，做二次确认，回调检查
 ![](images/producer-message-storage-2.jpg)
 
 **延迟投递：** 如果再高并发的情况下，消息就不要入库了，延迟投递，可以不保证首次100%的成功，但是一定要保证性能。  
 	
-	1. 首次发送，一定等到业务数据入库之后再发送消息，Upstream serivce上游服务
-	2. 延迟发送刚发送消息的检查消息
-	3. 当消费者消费消息
-	4. 消息消费成功之后，发送一个确认消费消息
-	5. CallBack服务收到消费者的确认消息，消费成功之后，做消息的持久化存储
-	6. CallBack服务检查，处理第二步发送的检查消息，检查数据库是否有处理成功，如果处理成功了，那么就不用处理任何事情，如果处理失败了，Callback服务再通知Upstream服务再次发送消息。
+
+```java
+1. 首次发送，一定等到业务数据入库之后再发送消息，Upstream serivce上游服务
+2. 延迟发送刚发送消息的检查消息
+3. 当消费者消费消息
+4. 消息消费成功之后，发送一个确认消费消息
+5. CallBack服务收到消费者的确认消息，消费成功之后，做消息的持久化存储
+6. CallBack服务检查，处理第二步发送的检查消息，检查数据库是否有处理成功，如果处理成功了，那么就不用处理任何事情，如果处理失败了，Callback服务再通知Upstream服务再次发送消息。
+```
 
 #### 幂等性概念
 
@@ -295,12 +300,14 @@ public class Consumer {
 ##### Confirm确认消息流程解析
 ![](images/producer-message-confirm.jpg)
 
-    1. 在channel上开启确认模式：channel.confirmSelect()
-	2. 在channel上添加监听：addConfirmListener，监听成功和失败的返回结果，根据具体的结果对消息进行重新发送，或记录日志等后续处理
+```java
+1. 在channel上开启确认模式：channel.confirmSelect()
+2. 在channel上添加监听：addConfirmListener，监听成功和失败的返回结果，根据具体的结果对消息进行重新发送，或记录日志等后续处理
+```
 
 ##### Confirm确认消息-示例代码
 1. Producer-生产者
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -347,7 +354,7 @@ public class Producer {
 }
 ```
 2. Consumer-消费者
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -401,6 +408,7 @@ public class Consumer {
 > 3、在某些情况下，如果我们发送消息的时候，当前的exchange不存在或者指定的RoutingKey路由不到，此时如果我们需要监听这种不可达的消息，就要使用ReturnListener  
 
 **基础API中一些关键配置项**
+
 1. Mandatory：如果为true，则监听器会接收到路由不可达的消息，然后进行后续处理，如果为false，那么Broker端自动删除该消息
 
 ##### Return消息机制流程
@@ -408,7 +416,7 @@ public class Consumer {
 
 ##### Return消息机制示例代码
 1. Producer-生产者
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -457,7 +465,7 @@ public class Producer {
 }
 ```
 2. Consumer-消费者
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -521,7 +529,7 @@ global：true/false是否将上面设置应用于channel，简单说，就是上
 
 ##### 消费端限流示例代码
 1. **Producer-生产者**
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -563,7 +571,7 @@ public class Producer {
 }
 ```
 2. **Consumer-消费者**
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -626,7 +634,7 @@ public class Consumer {
 > 一般应用中，都会关闭重回队列
 
 1. **Producer-生产者**
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -668,7 +676,7 @@ public class Producer {
 }
 ```
 2. **Consumer-消费者**
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -751,7 +759,7 @@ RoutingKey：#
 
 ##### 死信队列-示例代码
 1. **Producer-生产者**
-```
+```java
 public class Producer {
 
 	public static void main(String[] args) throws Exception {
@@ -785,7 +793,7 @@ public class Producer {
 }
 ```
 2. **Consumer-消费者**  
-```
+```java
 public class Consumer {
 
 	public static void main(String[] args) throws Exception {
@@ -840,15 +848,15 @@ public class Consumer {
 		
 	}
 }
-``` 
-  
+```
+
 ## 第四章 RabbitMQ高级整合应用
 
 #### 4.1 RabbitMQ整合Spring AMQP实战
 > RabbitAdmin、SpringAMQP注解的方式声明、RabbitTemplate、SimpleMessageListenerContainer、MessageListenerAdapter、MessageConverter
 
 1. RabbitAdmin，该类可以很好的操作RabbitMQ，在Spring中直接注入即可使用
-```
+```java
 @Bean
 public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
 	RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
@@ -863,7 +871,7 @@ RabbitAdmin底层实现就是从Spring容器中获取Exchange、Binding、Routin
 然后使用RabbitTemplate的execute方法执行对应的声明，修改，删除等一系列RabbitMQ基础功能操作，例如：添加一个交换机、删除一个绑定、清空一个队列里的消息等。
 
 2. 使用SpringAMQP声明，即使用@Bean的注解的方式
-```
+```java
 @Bean
 public TopicExchange exchange() {
 	return new TopicExchange("topic001", true, false);
@@ -883,7 +891,7 @@ public Binding binding() {
 3. RabbitTemplate 即消息模板
 
 &emsp;在与SpringAMQP整合的时候进行发送消息的关键类，该类提供了丰富的发送消息方法，包括可靠性投递方法、回调监听消息接口ConfirmCallback，返回值确认接口ReturnCallback等。同样需要注入到Spring容器中，才能后续的使用。
-```
+```java
 @Bean
 public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
 	RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -903,7 +911,7 @@ public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
 - 设置具体的监听器、消息转换器等
 
 <font color>注意项：</font>**SimpleMessageListenerContainer**可以进行动态设置，比如在运行中的应用可以动态的修改消费者数量的大小，接收消息的模式等
-```
+```java
 @Bean
 public SimpleMessageListenerContainer messageContainer(ConnectionFactory connectionFactory) {
 	SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
@@ -948,7 +956,7 @@ public SimpleMessageListenerContainer messageContainer(ConnectionFactory connect
 **defaultListenerMethod**默认监听方法，用户设置监听方法名称  
 **Delegate委托对象**：实际真实的委托对象，用于处理消息  
 **queueOrTagToMethodName**队列标识与方法名称组成的集合，可以一一进行队列与方法名称的匹配，队列和方法名称绑定，即指定队列里的消息会被绑定的方法所接受处理。
-```
+```java
 @Bean
 public SimpleMessageListenerContainer messageContainer(ConnectionFactory connectionFactory) {
 	SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
@@ -999,7 +1007,7 @@ public SimpleMessageListenerContainer messageContainer(ConnectionFactory connect
 }
 ```
 适配器的委托类，接收消息
-```
+```java
 public class MessageDelegate {
 
 	public void handleMessage(byte[] messageBody) {
@@ -1036,7 +1044,7 @@ public class MessageDelegate {
 - DefaultJackson2JavaTypeMapper映射器：可以进行Java对象的映射关系
 - 自定义二进制转换器，比如图片类型，PDF，PPT，流媒体
 
-```
+```java
 @Bean
 public SimpleMessageListenerContainer messageContainer(ConnectionFactory connectionFactory) {
 	SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
@@ -1079,7 +1087,7 @@ public SimpleMessageListenerContainer messageContainer(ConnectionFactory connect
 <font color=red>注意：在发送消息的时候对template进行配置**mandatory=true**保证监听有效。生产端还可以配置其他属性，比如：发送重试，超时时间、次数、间隔等</font>
 
 **application.properties配置**
-```
+```java
 spring.rabbitmq.host=10.125.28.253
 spring.rabbitmq.port=5672
 spring.rabbitmq.username=zxc
@@ -1092,7 +1100,8 @@ spring.rabbitmq.publisher-returns=true
 spring.rabbitmq.template.mandatory=true
 ```
 **生产者投递消息到Broker**
-```
+
+```java
 @Component
 public class RabbitSender {
 
@@ -1154,7 +1163,7 @@ public class RabbitSender {
 > @RabbitListener是一个组合注解，里面可以注解配置@QueueBinding、@Queue、@Exchange直接通过这个组合注解一次性搞定消费端交换机、队列、绑定、路由、并且配置监听功能等。
 
 **application.properties配置**
-```
+```java
 spring.rabbitmq.host=10.125.28.253
 spring.rabbitmq.port=5672
 spring.rabbitmq.username=zxc
@@ -1168,7 +1177,7 @@ spring.rabbitmq.listener.simple.max-concurrency=10
 ```
 
 **消费端接收消息**
-```
+```java
 @Component
 public class RabbitReceiver {
 
